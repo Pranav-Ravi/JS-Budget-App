@@ -67,15 +67,52 @@ var budgetController = (function() {
 //USER INTERFACE CONTROLLER
 var uiController = (function() {
 
+    var DOMstrings = {
+        inputType: '.add__type',
+        inputDescription: '.add__description',
+        inputValue: '.add__value',
+        addBtn: '.add__btn'
+    };
+
+
+    //public variables and functions
+    return {
+        getInputValues: function() {
+            return {
+                inputType: document.querySelector(DOMstrings.inputType).value,
+                inputDescription: document.querySelector(DOMstrings.inputDescription).value,
+                inputValue: document.querySelector(DOMstrings.inputValue).value
+            }
+        },
+
+        getDOMstrings: function() {
+            return DOMstrings;
+        },
+    }
+
 })();
 
 
 //GLOBAL CONTROLLER
 var controller = (function(budgetCtrl, uiCtrl){
+    //PRIVATE VARIABLES AND FUNCTIONS
+    var setupEventListeners = function() {
+        var DOM = uiCtrl.getDOMstrings();
+
+        //add__btn event
+        document.querySelector(DOM.addBtn).addEventListener('click', ctrlAddItem);
+        //enter key press event
+        document.addEventListener('keypress', function(event) {
+            if(event.keyCode === 13 || event.which === 13) {
+                ctrlAddItem();
+            }
+        });
+    }
 
     var ctrlAddItem = function() {
 
         //1. Get the filled input data
+        var inputData = uiCtrl.getInputValues();
 
         //2. Add new items to the budget controller
 
@@ -84,16 +121,15 @@ var controller = (function(budgetCtrl, uiCtrl){
         //4. Calculate the budget
 
         //5. Display the new budget in the UI
-        console.log('Item has been added!');
     };
 
-    //add__btn event
-    document.querySelector('.add__btn').addEventListener('click', ctrlAddItem);
-    //enter key press event
-    document.addEventListener('keypress', function(event) {
-        if(event.keyCode === 13 || event.which === 13) {
-            ctrlAddItem();
+    //PUBLIC VARIABLES AND FUNCTIONS
+    return {
+        init: function() {
+            setupEventListeners();
         }
-    });
+    }
+})(budgetController, uiController);
 
-})(budgetController, uiController);,
+//call the init function to activate all the event listeners
+controller.init();
