@@ -67,6 +67,7 @@ var budgetController = (function() {
      and store them into arrays   
     */
 
+    //private variables and functions
     var Expenses = function(id, description, value) {
         this.id = id;
         this.description = description;
@@ -92,6 +93,39 @@ var budgetController = (function() {
             inc: 0
         }
     }
+
+    //public varibles and functions
+    return {
+        //function to add new items to their respective array
+        addItem: function(type, des, val) {
+            var newItem, ID;
+
+            //create new ID
+            if(data.allItems[type].length > 0){
+                ID = data.allItems[type][data.allItems[type].length-1].id+1;
+            } else {
+                ID = 0;
+            }
+            
+
+            //create new item based on whether its a 'exp' or 'inc'
+            if(type === 'exp') {
+                newItem = new Expenses(ID, des, val);
+            } else if(type === 'inc') {
+                newItem = new Income(ID, des, val);
+            }
+
+            //push the new item to the array based in the type
+            data.allItems[type].push(newItem);
+
+            //return new item
+            return newItem;
+        },
+
+        testData: function() {
+            console.log(data);
+        }
+    };
 })();
 
 //USER INTERFACE CONTROLLER
@@ -109,7 +143,7 @@ var uiController = (function() {
     return {
         getInputValues: function() {
             return {
-                inputType: document.querySelector(DOMstrings.inputType).value,
+                inputType: document.querySelector(DOMstrings.inputType).value, //will be either income or expense
                 inputDescription: document.querySelector(DOMstrings.inputDescription).value,
                 inputValue: document.querySelector(DOMstrings.inputValue).value
             }
@@ -140,11 +174,13 @@ var controller = (function(budgetCtrl, uiCtrl){
     }
 
     var ctrlAddItem = function() {
+        var inputData, newItem;
 
         //1. Get the filled input data
-        var inputData = uiCtrl.getInputValues();
+        inputData = uiCtrl.getInputValues();
 
         //2. Add new items to the budget controller
+        newItem = budgetCtrl.addItem(inputData.inputType, inputData.inputDescription, inputData.inputValue);
 
         //3. Add new items to the UI
 
