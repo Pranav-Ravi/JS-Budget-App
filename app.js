@@ -175,6 +175,22 @@ var uiController = (function() {
             //Insert the html into the DOM
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
         },
+
+        clearFields: function() {
+            var fields, fieldsArr;
+
+            //querySelectorAll returns a list, not an array
+            fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
+            //trick to convert lists into arrays
+            fieldsArr = Array.prototype.slice.call(fields);
+            //forEach method acts like a for loop
+            fieldsArr.forEach(function(current, index, array) {
+                current.value = "";
+            });
+            //using focus to put the cursor in the input line, even after pushing 
+            //new value to the array
+            fieldsArr[0].focus();
+        }
     }
 
 })();
@@ -196,6 +212,14 @@ var controller = (function(budgetCtrl, uiCtrl){
         });
     }
 
+    var updateBudget = function() {
+        //!. Calculate the budget
+
+        //2. return the budget
+
+        //3. Display the budget on the UI
+    };
+
     var ctrlAddItem = function() {
         var inputData, newItem;
 
@@ -208,9 +232,8 @@ var controller = (function(budgetCtrl, uiCtrl){
         //3. Add new items to the UI
         uiCtrl.addItemUI(newItem, inputData.type);
 
-        //4. Calculate the budget
-
-        //5. Display the new budget in the UI
+        //4. Clear the fields
+        uiCtrl.clearFields();        
     };
 
     //PUBLIC VARIABLES AND FUNCTIONS
