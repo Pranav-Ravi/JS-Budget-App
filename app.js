@@ -72,16 +72,29 @@ var budgetController = (function() {
         this.id = id;
         this.description = description;
         this.value = value;
-    }
+    };
 
     var Income = function(id, description, value) {
         this.id = id;
         this.description = description;
         this.value = value;
-    }
-
-    var allExpenses = [];
-    var allIncomes = [];
+    };
+    
+    var calculateTotal = function(type) {
+        var sum = 0;
+        data.allType[type].forEach(function (currElement) {
+            sum += currElement.value;
+        });
+        /*
+         For example,
+         sum = 0
+         [200, 300, 400]
+         1. sum = 0 + 200 = 200
+         2. sum = 200 + 300 = 500
+         3. sum = 500 + 400 = 900
+         final sum value = 900
+        */
+    };
 
     var data = {
         allItems: {
@@ -91,7 +104,9 @@ var budgetController = (function() {
         totals: {
             exp: 0,
             inc: 0
-        }
+        },
+        budget: 0,
+        percentage: -1; 
     }
 
     //public varibles and functions
@@ -121,6 +136,35 @@ var budgetController = (function() {
             //return new item
             return newItem;
         },
+        
+        calculateBudget: function() {
+            //Sum of all income and expenses
+            calculateTotal('inc');
+            calculateTotal('exp');
+            
+            //Calculate income - expenses
+            data.budget = data.totals.inc - data.totals.exp;
+            
+            //Calculate the percentage of income that we spent
+            if(data.totals.inc > 0) {
+                data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+            } else {
+                data.percentage = -1;
+            }
+            /*
+                For Example, Expense = 100 and Income = 300, 
+                spent = 33.333% = 100/300 = 0.3333 * 100
+            */
+        },
+        
+        getBudget: function() {
+            return {
+                budget: data.budget,
+                totalInc: data.totals.inc,
+                totalExp: data.totals.exp,
+                percentage: data.percentage
+            }
+        },
 
         testData: function() {
             console.log(data);
@@ -147,7 +191,7 @@ var uiController = (function() {
             return {
                 inputType: document.querySelector(DOMstrings.inputType).value, //will be either income or expense
                 inputDescription: document.querySelector(DOMstrings.inputDescription).value,
-                inputValue: document.querySelector(DOMstrings.inputValue).value
+                inputValue: parseFloat(document.querySelector(DOMstrings.inputValue).value)
             }
         },
 
@@ -214,10 +258,13 @@ var controller = (function(budgetCtrl, uiCtrl){
 
     var updateBudget = function() {
         //!. Calculate the budget
-
+        budgetCtrl.calculateBudget();
+        
         //2. return the budget
-
+        var budget = budgetCtrl.getBudget();
+        
         //3. Display the budget on the UI
+        console.log(budget);
     };
 
     var ctrlAddItem = function() {
@@ -225,15 +272,22 @@ var controller = (function(budgetCtrl, uiCtrl){
 
         //1. Get the filled input data
         inputData = uiCtrl.getInputValues();
+    
+        //Only happens if there is any data
+        if(input.description !== "" && !isNan(input.value) && input.value > 0) {
+            //2. Add new items to the budget controller
+            newItem = budgetCtrl.addItem(inputData.inputType, inputData.inputDescription, inputData.inputValue);
 
-        //2. Add new items to the budget controller
-        newItem = budgetCtrl.addItem(inputData.inputType, inputData.inputDescription, inputData.inputValue);
+            //3. Add new items to the UI
+            uiCtrl.addItemUI(newItem, inputData.type);
 
-        //3. Add new items to the UI
-        uiCtrl.addItemUI(newItem, inputData.type);
-
-        //4. Clear the fields
-        uiCtrl.clearFields();        
+            //4. Clear the fields
+            uiCtrl.clearFields();   
+        
+            //5. Calculate and update budget
+            updateBudget();
+        }
+        
     };
 
     //PUBLIC VARIABLES AND FUNCTIONS
