@@ -144,6 +144,30 @@ var budgetController = (function() {
             //return new item
             return newItem;
         },
+
+        deleteItem: function(type, id) {
+            var ids, index;
+            /* 
+                suppose the array is [1 2 4 6 8]
+                and id we want is 6
+                index will be 3
+                But it cant be done using the normal way,
+                like data.allItems[type][id], since the array wont
+                be sorted.
+                So this problem can be sorted through index and splice
+            */
+
+            //map is same as forEach() and it returns an array of found results
+            var ids = data.allItems[type].map(function(current){
+                return current.id;
+            });
+
+            index= ids.indexOf(id);
+
+            if(index !== -1) {
+                data.allItems[type].splice(index, 1);
+            }
+        },
         
         calculateBudget: function() {
             //Sum of all income and expenses
@@ -330,15 +354,16 @@ var controller = (function(budgetCtrl, uiCtrl){
 
         //split the string using hyphen as the center to two
         splitID = itemID.split('-');
-        type = spltiID[0];
-        ID = splitID[1];
+        type = splitID[0];
+        ID = parseInt(splitID[1]);
 
         //1. Delete the item from the data structure
+        budgetCtrl.deleteItem(type, ID);
 
         //2. Delete the item from the UI
 
         //3. Update and show the new budget
-        
+
     };
 
     //PUBLIC VARIABLES AND FUNCTIONS
